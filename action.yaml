@@ -1,0 +1,41 @@
+# To add to the marketplace use this file, I personally do not want to read the agreement.
+
+
+# name: 'Push to Remotes & Reset History'
+# description: 'Flattens your git history into a single commit and force-pushes it back to the main branch.'
+# author: 'YourName'
+# branding:
+#   icon: 'git-commit'
+#   color: 'orange'
+
+# inputs:
+#   github_token:
+#     description: 'The GitHub token to use for pushing.'
+#     required: true
+#   commit_message:
+#     description: 'The commit message for the flattened history.'
+#     required: false
+#     default: 'Automated History Reset'
+
+# runs:
+#   using: "composite"
+#   steps:
+#     - name: Configure Git as Bot
+#       shell: bash
+#       run: |
+#         git config --global user.name "github-actions[bot]"
+#         git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+#     - name: Reset History
+#       shell: bash
+#       run: |
+#         git checkout --orphan temp_branch
+#         git add -A
+#         git commit -m "${{ inputs.commit_message }}: $(date +'%Y-%m-%d %H:%M:%S')"
+#         git branch -M main
+
+#     - name: Force Push to GitHub
+#       shell: bash
+#       run: |
+#         git remote set-url origin https://${{ inputs.github_token }}@github.com/${{ github.repository }}.git
+#         git push -f origin main

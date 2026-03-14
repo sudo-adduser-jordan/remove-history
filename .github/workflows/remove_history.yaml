@@ -1,0 +1,46 @@
+name: Push to Remotes
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Configure Git as Bot
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Reset History
+        run: |
+          # Create a new orphan branch (no parents/history)
+          git checkout --orphan temp_branch
+          
+          # Add all files
+          git add -A
+          
+          # Create the single commit
+          git commit -m "Automated History Reset: $(date +'%Y-%m-%d %H:%M:%S')"
+          
+          # Replace main with the new branch (force rename without separate delete)
+          git branch -M main
+
+      - name: Force Push to GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+        run: |
+          # Set remote URL to use the token
+          git remote set-url origin https://$GITHUB_TOKEN@github.com/${{ github.repository }}.git
+          # Force push the rewritten main branch
+          git push -f origin main
